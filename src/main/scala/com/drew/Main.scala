@@ -16,7 +16,7 @@ object Main extends IOApp.Simple {
 
   // This is your new "main"!
   def run: IO[Unit] = {
-    val volume = 2
+    val volume = 10_000
     val producerSettings: ProducerSettings[IO, String, String] =
       ProducerSettings[IO, String, String]
         .withBootstrapServers("localhost:9091")
@@ -42,6 +42,8 @@ object Main extends IOApp.Simple {
   def toRecord(raw: Bag): ProducerRecord[String, String] = {
     val key = raw.a
     val value = raw.asJson.toString
+    val size = value.getBytes("UTF-8").length
+    println(s"size of record is: $size")
     ProducerRecord("topic", key, value)
   }
 

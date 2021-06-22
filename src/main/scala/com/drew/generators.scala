@@ -1,7 +1,9 @@
 package com.drew
 
+import com.drew.event._
 import com.drew.externalmerchant._
 import com.drew.models._
+import com.drew.sharedGen._
 import io.estatico.newtype.Coercible
 import io.estatico.newtype.ops._
 import org.scalacheck.Gen
@@ -24,7 +26,7 @@ object generators extends CommonGen {
 
   val merchantEvent: Gen[ExternalMerchantEvent] = for {
     eventVersion <- coerceGenStr[EventVersion]
-    eventType <- Gen.oneOf(Seq(ExternalMerchantCreated, ExternalMerchantUpdated, ExternalMerchantDeleted))
+    eventType <- Gen.oneOf(Seq("foo", "bar", "baz"))
     payload <- kafkaExternalMerchant
   } yield ExternalMerchantEvent(eventVersion, eventType, payload)
 

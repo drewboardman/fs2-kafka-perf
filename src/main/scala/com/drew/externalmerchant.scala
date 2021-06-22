@@ -4,6 +4,7 @@ import com.drew.models._
 import io.circe.Codec
 //NOTE: Do not remove this import. IntelliJ will see it as unused, but it is needed
 //      by circe for codecs on refined types
+import io.circe.refined._
 import io.circe.generic.semiauto.deriveCodec
 
 object externalmerchant extends CoercibleCodecs {
@@ -50,6 +51,8 @@ object externalmerchant extends CoercibleCodecs {
       hasRnmid: Boolean,
       statusChangedTimestamp: Option[StatusChangedTimestamp] = None
   )
+
+  case class ChowNowId(restaurantBrandId: RestaurantBrandId, restaurantLocationId: RestaurantLocationId)
 
   object ChowNowMerchant {
     implicit val codec: Codec[ChowNowMerchant] = deriveCodec[ChowNowMerchant]
