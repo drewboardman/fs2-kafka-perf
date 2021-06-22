@@ -7,16 +7,16 @@ import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
 import io.circe.syntax._
 import org.scalacheck.Gen
-import org.typelevel.log4cats.{Logger, SelfAwareStructuredLogger}
+import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 object Main extends IOApp.Simple {
   import Stuff._
-  implicit val logger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
+  implicit def unsafeLogger: SelfAwareStructuredLogger[IO] = Slf4jLogger.getLogger[IO]
 
   // This is your new "main"!
   def run: IO[Unit] = {
-    val volume = 10_000
+    val volume = 1_000_000
     val producerSettings: ProducerSettings[IO, String, String] =
       ProducerSettings[IO, String, String]
         .withBootstrapServers("localhost:9091")
@@ -43,7 +43,6 @@ object Main extends IOApp.Simple {
     val key = raw.a
     val value = raw.asJson.toString
     val size = value.getBytes("UTF-8").length
-    println(s"size of record is: $size")
     ProducerRecord("topic", key, value)
   }
 
@@ -53,7 +52,7 @@ object Main extends IOApp.Simple {
       result <- process
       stop <- Clock[IO].realTime
       total = stop.length - start.length
-      _ <- Logger[IO].warn(s"$label took: $total millis")
+      _ <- IO.pure(println(s"$label took: $total millis"))
     } yield result
 }
 
