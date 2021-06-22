@@ -1,0 +1,12 @@
+.metals/
+.bloop/
+metals.sbt
+target/
+.vscode/
+.idea/
+.bsp/
+.DS_Store
+project/project/
+project/target/
+build/
+modules/chownow/src/it/resources/full-stack/
