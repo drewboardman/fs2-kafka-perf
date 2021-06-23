@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   zookeeper:
-    image: mdvdregsrvprd01.idine.com:5000/zookeeper:latest
+    image: confluentinc/cp-zookeeper:latest
     ports:
       - "2181:2181"
     environment:
@@ -12,7 +12,7 @@ services:
       timeout: 5s
       retries: 10
   kafka:
-    image: mdvdregsrvprd01.idine.com:5000/cp-kafka:latest
+    image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
@@ -32,11 +32,3 @@ services:
       interval: 10s
       timeout: 7s
       retries: 3
-
-#   topicnator:
-#     image: mdvdregsrvprd01.idine.com:5000/topicnator:1.0.120
-#     environment:
-#       MAX_TOPIC_REPLICATION_FACTOR: 1
-#       BOOTSTRAP_SERVERS: "kafka:9092"
-#     depends_on:
-#       - kafka
