@@ -1,7 +1,7 @@
 package com.drew
 
 import cats.effect.{Clock, IO, IOApp}
-import fs2.Stream
+import fs2.{Chunk, Stream}
 import fs2.kafka._
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
@@ -9,6 +9,8 @@ import io.circe.syntax._
 import org.scalacheck.Gen
 import org.typelevel.log4cats.SelfAwareStructuredLogger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
+
+import scala.concurrent.duration.DurationInt
 
 object Main extends IOApp.Simple {
   import Stuff._
@@ -20,16 +22,14 @@ object Main extends IOApp.Simple {
     val producerSettings: ProducerSettings[IO, String, String] =
       ProducerSettings[IO, String, String]
         .withBootstrapServers("localhost:9091")
+        .withLinger(2.seconds)
 
     val stream: Stream[IO, ProducerRecords[Unit, String, String]] = Stream
       .emit(Stuff.genBag.sample)
       .repeatN(volume)
       .unNone
-      .map { bag =>
-        val record = toRecord(bag)
-        val res = ProducerRecords.one(record)
-        res
-      }
+      .chunkN(1_000)
+      .map(toRecords)
 
     val process = stream
       .through(KafkaProducer.pipe(producerSettings))
@@ -39,10 +39,18 @@ object Main extends IOApp.Simple {
     withLoggedTimingF(process, s"publishing $volume events")
   }
 
+  def toRecords(chunk: Chunk[Bag]): ProducerRecords[Unit, String, String] = {
+    val records = chunk.map { bag =>
+      val key = bag.a
+      val value = bag.asJson.toString
+      ProducerRecord("topic", key, value)
+    }
+    ProducerRecords(records)
+  }
+
   def toRecord(raw: Bag): ProducerRecord[String, String] = {
     val key = raw.a
     val value = raw.asJson.toString
-    val size = value.getBytes("UTF-8").length
     ProducerRecord("topic", key, value)
   }
 
