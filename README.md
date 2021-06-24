@@ -71,3 +71,17 @@ If you'd like to remove `Chunk`ing, there is a branch without it.
 | 30\_000     | default      | default     | 1000     | 5          | 1              | ~560                | 1\_000\_000 | 19149           | 12.21%                                                |
 | 200         | default      | default     | 1000     | 5          | 1              | ~560                | 1\_000\_000 | 18711           | 11.93%                                                |
 | default     | 2            | default     | 1000     | 5          | 1              | ~560                | 1\_000\_000 | 17562           | 11.20%                                                |
+
+## Circe Only
+
+It's possible that the serialization step is contributing to the performance
+issues. In this application I'm using `circe` to do my serialization and JSON
+and the protocol. Here are averages over 4x1_000_000 runs using only circe (no
+kafka at all).
+
+| volume      | total encoding time (sec) | average chunked total time with kafka (sec) | percentage of total time |
+| ----------- | ------------------------- | ------------------------------------------- | ------------------------ |
+| 1\_000\_000 | 13.9                      | 53.2737                                     | 26.09%                   |
+| 1\_000\_000 | 14.875                    | 53.2737                                     | 27.92%                   |
+| 1\_000\_000 | 13.9                      | 53.2737                                     | 26.09%                   |
+| 1\_000\_000 | 13.5                      | 53.2737                                     | 25.34%                   |

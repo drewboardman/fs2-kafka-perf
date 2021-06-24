@@ -1,7 +1,7 @@
 package com.drew
 
 import cats.effect.{Clock, IO, IOApp}
-import fs2.{Chunk, Stream}
+import fs2.{Chunk, Pure, Stream}
 import fs2.kafka._
 import io.circe.Codec
 import io.circe.generic.semiauto.deriveCodec
@@ -19,25 +19,22 @@ object Main extends IOApp.Simple {
   // This is your new "main"!
   def run: IO[Unit] = {
     val volume = 1_000_000
-    val producerSettings: ProducerSettings[IO, String, String] =
-      ProducerSettings[IO, String, String]
-        .withBootstrapServers("localhost:9091")
-        .withLinger(2.seconds)
 
-    val stream: Stream[IO, ProducerRecords[Unit, String, String]] = Stream
+    val stream: Stream[IO, Chunk[String]] = Stream
       .emit(Stuff.genBag.sample)
       .repeatN(volume)
       .unNone
       .chunkN(1_000)
-      .map(toRecords)
+      .map(toJSON)
 
-    val process = stream
-      .through(KafkaProducer.pipe(producerSettings))
+    val process: IO[Unit] = stream
       .compile
       .drain
 
-    withLoggedTimingF(process, s"publishing $volume events")
+    withLoggedTimingF(process, s"converting $volume objects to JSON")
   }
+
+  def toJSON(chunk: Chunk[Bag]): Chunk[String] = chunk.map(_.asJson.toString)
 
   def toRecords(chunk: Chunk[Bag]): ProducerRecords[Unit, String, String] = {
     val records = chunk.map { bag =>
