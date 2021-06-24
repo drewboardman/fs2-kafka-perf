@@ -49,6 +49,8 @@ sbt run
 
 This should publish 1 million (default) events and output how long it took.
 
+If you'd like to remove `Chunk`ing, there is a branch without it.
+
 ## Some Results
 
 `perf-test.sh` benchmarks
